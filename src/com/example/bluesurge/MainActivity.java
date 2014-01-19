@@ -21,23 +21,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ScrollView scroll = (ScrollView) findViewById(R.id.scrollView1);
-        LinearLayout list = (LinearLayout) findViewById(R.id.list);
-        BluetoothAdapter localBT = BluetoothAdapter.getDefaultAdapter();
-        Set<BluetoothDevice> remoteBT = localBT.getBondedDevices();
-        Iterator<BluetoothDevice> it = remoteBT.iterator();
-        Log.e("MainActivity", "Searching for BT devices");
-        while(it.hasNext()) {
-        	Button button = new Button(this);
-        	list.addView(button);
-            Log.e("MainActivity", "Added button");
-        	BluetoothDevice remote = it.next();
-        	button.setText(remote.getName());
-        	OnClickListener listen = new OnClickListener();
-        	button.setOnClickListener(l)(buttonClick);
-        }
-        
-        
+        refreshBTDevices();  
     }
 
     public void buttonClick(View view) {
@@ -51,7 +35,21 @@ public class MainActivity extends Activity {
         return true;
     }
     
-    public void test(View view) {
-    	
+    public void refreshBTDevices() {
+        ScrollView scroll = (ScrollView) findViewById(R.id.scrollView1);
+        LinearLayout list = (LinearLayout) findViewById(R.id.list);
+        BluetoothAdapter localBT = BluetoothAdapter.getDefaultAdapter();
+        Set<BluetoothDevice> remoteBT = localBT.getBondedDevices();
+        Iterator<BluetoothDevice> it = remoteBT.iterator();
+        Log.e("MainActivity", "Searching for BT devices");
+        while(it.hasNext()) {
+        	Button button = new Button(this);
+        	list.addView(button);
+            Log.e("MainActivity", "Added button");
+        	BluetoothDevice remote = it.next();
+        	button.setText(remote.getName());
+        	//OnClickListener listen = new OnClickListener();
+        	//button.setOnClickListener(l)(buttonClick);
+        }
     }
 }
