@@ -41,6 +41,7 @@ public class MainActivity extends Activity {
         BluetoothAdapter localBT = BluetoothAdapter.getDefaultAdapter();
         Set<BluetoothDevice> remoteBT = localBT.getBondedDevices();
         Iterator<BluetoothDevice> it = remoteBT.iterator();
+        
         Log.e("MainActivity", "Searching for BT devices");
         while(it.hasNext()) {
         	Button button = new Button(this);
@@ -48,8 +49,16 @@ public class MainActivity extends Activity {
             Log.e("MainActivity", "Added button");
         	BluetoothDevice remote = it.next();
         	button.setText(remote.getName());
-        	//OnClickListener listen = new OnClickListener();
-        	//button.setOnClickListener(l)(buttonClick);
+        	OnClickListener listen = new OnClickListener()
+        	{
+        	    @Override
+        	    public void onClick(View button)
+        	    {
+        	    	Button blah = (Button)button;
+        	    	blah.setText("I CLICKED IT!");
+        	    }
+        	};
+        	button.setOnClickListener(listen);
         }
     }
 }
