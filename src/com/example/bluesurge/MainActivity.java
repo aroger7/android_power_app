@@ -1,11 +1,14 @@
 package com.example.bluesurge;
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.UUID;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -57,6 +60,16 @@ public class MainActivity extends Activity {
         	        if( !localBT.isEnabled() && remoteBT == null ) {
         	        	Log.e("MainActivity", "Can't connect, BT is off or device doesn't exist");
         	        } else {
+        	        	/*UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
+        	        	BluetoothSocket BTsocket = null;
+        	        	try {
+							BTsocket = remoteBT.createRfcommSocketToServiceRecord(uuid);
+							BTsocket.connect();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							Log.e("MainActivity", "connect failed");
+							return;
+						}*/
         	        	
         	        	Intent toggleIntent = new Intent(button.getContext(), ToggleActivity.class);
         	        	toggleIntent.putExtra("REMOTE_BT", remoteBT);

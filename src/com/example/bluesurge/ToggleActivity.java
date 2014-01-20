@@ -1,14 +1,30 @@
 package com.example.bluesurge;
 
-import android.os.Bundle;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.UUID;
+
+import android.annotation.TargetApi;
 import android.app.Activity;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
+import android.content.Intent;
+import android.os.Build;
+import android.os.Bundle;
+import android.support.v4.app.NavUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.support.v4.app.NavUtils;
-import android.annotation.TargetApi;
-import android.os.Build;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ToggleButton;
 
 public class ToggleActivity extends Activity {
+	
+	BluetoothSocket BTsock;
+	OutputStream output;
+	InputStream input;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -16,6 +32,8 @@ public class ToggleActivity extends Activity {
 		setContentView(R.layout.activity_toggle);
 		// Show the Up button in the action bar.
 		setupActionBar();
+		Button toggle_button = (Button) findViewById(R.id.circuit_toggle_button);
+		toggle_button.setClickable(false);
 	}
 
 	/**
@@ -50,6 +68,50 @@ public class ToggleActivity extends Activity {
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
+	}
+	
+	public void connect_click(View view) {
+		Intent toggleIntent = getIntent();
+		BluetoothDevice remoteBT = toggleIntent.getParcelableExtra("REMOTE_BT");
+    	UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
+    	BluetoothSocket BTsocket = null;
+    	try {
+			BTsocket = remoteBT.createRfcommSocketToServiceRecord(uuid);
+			BTsocket.connect();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			Log.e("MainActivity", "connect failed");
+			return;
+		}
+		Button connect_button = (Button) view;
+		connect_button.setClickable(false);
+		Button toggle_button = (Button) findViewById(R.id.circuit_toggle_button);
+		toggle_button.setClickable(true);
+		BTsock = BTsocket;
+		try {
+			output = BTsocket.getOutputStream();
+			input = BTsocket.getInputStream();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.exit(0);
+		}
+	}
+	
+	public void toggle_button_click(View view) {
+		ToggleButton toggle_button = (ToggleButton) view;
+		String message;
+		if( toggle_button.isChecked() ) {
+			message = "ON ";
+		} else {
+			message = "OFF";
+		}
+		try {
+			output.write(message.getBytes());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

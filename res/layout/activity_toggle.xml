@@ -10,11 +10,20 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".ToggleActivity" >
 
+    <Button
+        android:id="@+id/connect_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.48"
+        android:text="Connect" 
+        android:onClick="connect_click"/>
+
     <ToggleButton
-        android:id="@+id/toggleButton1"
+        android:id="@+id/circuit_toggle_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="0.53"
-        android:text="ToggleButton" />
+        android:text="ToggleButton" 
+        android:onClick="toggle_button_click"/>
 
 </LinearLayout>
