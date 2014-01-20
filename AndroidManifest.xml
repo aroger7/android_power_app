@@ -5,7 +5,7 @@
     android:versionName="1.0" >
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
-    
+
     <uses-sdk
         android:minSdkVersion="8"
         android:targetSdkVersion="18" />
@@ -23,6 +23,14 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name="com.example.bluesurge.ToggleActivity"
+            android:label="@string/title_activity_toggle"
+            android:parentActivityName="com.example.bluesurge.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.bluesurge.MainActivity" />
         </activity>
     </application>
 

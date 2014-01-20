@@ -6,12 +6,12 @@ import java.util.Set;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
@@ -21,11 +21,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        refreshBTDevices();  
-    }
-
-    public void buttonClick(View view) {
-    	
+        refreshBTDevices();
     }
 
     @Override
@@ -44,18 +40,28 @@ public class MainActivity extends Activity {
         
         Log.e("MainActivity", "Searching for BT devices");
         while(it.hasNext()) {
-        	Button button = new Button(this);
+        	BTButton button = new BTButton(this);
         	list.addView(button);
             Log.e("MainActivity", "Added button");
         	BluetoothDevice remote = it.next();
         	button.setText(remote.getName());
+        	button.setRemoteBT(remote);
         	OnClickListener listen = new OnClickListener()
         	{
         	    @Override
         	    public void onClick(View button)
         	    {
-        	    	Button blah = (Button)button;
-        	    	blah.setText("I CLICKED IT!");
+        	    	BTButton btButton = (BTButton)button;
+        	        BluetoothAdapter localBT = BluetoothAdapter.getDefaultAdapter();
+        	        BluetoothDevice remoteBT = btButton.getRemoteBT();
+        	        if( !localBT.isEnabled() && remoteBT == null ) {
+        	        	Log.e("MainActivity", "Can't connect, BT is off or device doesn't exist");
+        	        } else {
+        	        	
+        	        	Intent toggleIntent = new Intent(button.getContext(), ToggleActivity.class);
+        	        	toggleIntent.putExtra("REMOTE_BT", remoteBT);
+        	    		startActivity(toggleIntent);
+        	        }
         	    }
         	};
         	button.setOnClickListener(listen);
