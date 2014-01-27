@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.UUID;
+import com.example.bluesurge.Enumerations;
+import com.example.bluesurge.Enumerations.packetType;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -18,6 +20,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ToggleButton;
 
 public class ToggleActivity extends Activity {
@@ -25,6 +28,8 @@ public class ToggleActivity extends Activity {
 	BluetoothSocket BTsock;
 	OutputStream output;
 	InputStream input;
+	String username;
+	String password;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +92,10 @@ public class ToggleActivity extends Activity {
 		connect_button.setClickable(false);
 		Button toggle_button = (Button) findViewById(R.id.circuit_toggle_button);
 		toggle_button.setClickable(true);
+		EditText usernameInput = (EditText) findViewById(R.id.usernameInput);
+		EditText passwordInput = (EditText) findViewById(R.id.passwordInput);
+		username = usernameInput.getText().toString();
+		password = passwordInput.getText().toString();
 		BTsock = BTsocket;
 		try {
 			output = BTsocket.getOutputStream();
@@ -96,18 +105,22 @@ public class ToggleActivity extends Activity {
 			e.printStackTrace();
 			System.exit(0);
 		}
+		
+		
 	}
 	
 	public void toggle_button_click(View view) {
-		ToggleButton toggle_button = (ToggleButton) view;
-		String message;
-		if( toggle_button.isChecked() ) {
-			message = "ON ";
+		ToggleButton toggleButton = (ToggleButton) view;
+		Packet togglePacket = new Packet();
+		
+		if( toggleButton.isChecked() ) {
+			togglePacket.setPacketType(packetType.ENABLE);
 		} else {
-			message = "OFF";
+			togglePacket.setPacketType(packetType.DISABLE);
 		}
+		togglePacket.setCredentials(username, password);
 		try {
-			output.write(message.getBytes());
+			output.write(togglePacket.getPacketData());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
