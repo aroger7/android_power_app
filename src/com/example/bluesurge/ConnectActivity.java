@@ -1,19 +1,18 @@
 package com.example.bluesurge;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.UUID;
-import com.example.bluesurge.Enumerations;
-import com.example.bluesurge.Enumerations.packetType;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v4.app.NavUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -21,13 +20,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
-public class ToggleActivity extends Activity {
+import com.example.bluesurge.Enumerations.packetType;
+
+public class ConnectActivity extends Activity {
 	
-	BluetoothSocket BTsock;
-	OutputStream output;
-	InputStream input;
+	BluetoothComms connectedBTService = null;
 	String username;
 	String password;
 
@@ -37,8 +37,33 @@ public class ToggleActivity extends Activity {
 		setContentView(R.layout.activity_toggle);
 		// Show the Up button in the action bar.
 		setupActionBar();
-		Button toggle_button = (Button) findViewById(R.id.circuit_toggle_button);
-		toggle_button.setClickable(false);
+		ServiceConnection serviceConnect = new ServiceConnection() {
+
+			@Override
+			public void onServiceConnected(ComponentName arg0,
+					IBinder arg1) {
+				// TODO Auto-generated method stub
+				Log.e("ConnectActivity", "Service connected");
+				connectedBTService = ((BluetoothComms.LocalBinder)arg1).getService();
+				if(connectedBTService == null) {
+					Log.e("ConnectActivity", "Service is null");
+				}
+			}
+
+			@Override
+			public void onServiceDisconnected(ComponentName name) {
+				// TODO Auto-generated method stub
+				Log.e("ConnectActivity", "Service disconnected");
+				connectedBTService = null;
+			}
+    		
+    	};
+    	
+    	Intent serviceIntent = new Intent(this, BluetoothComms.class);
+		if( bindService(serviceIntent, serviceConnect, 0) == true) {
+			Log.e("ConnectActivity", "Bound to BT service");
+		}
+		
 	}
 
 	/**
@@ -77,54 +102,22 @@ public class ToggleActivity extends Activity {
 	
 	public void connect_click(View view) {
 		Intent toggleIntent = getIntent();
-		BluetoothDevice remoteBT = toggleIntent.getParcelableExtra("REMOTE_BT");
-    	UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
-    	BluetoothSocket BTsocket = null;
-    	try {
-			BTsocket = remoteBT.createRfcommSocketToServiceRecord(uuid);
-			BTsocket.connect();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			Log.e("MainActivity", "connect failed");
-			return;
-		}
+		BluetoothDevice remoteBT = (BluetoothDevice) toggleIntent.getParcelableExtra("REMOTE_BT");
 		Button connect_button = (Button) view;
 		connect_button.setClickable(false);
-		Button toggle_button = (Button) findViewById(R.id.circuit_toggle_button);
-		toggle_button.setClickable(true);
 		EditText usernameInput = (EditText) findViewById(R.id.usernameInput);
 		EditText passwordInput = (EditText) findViewById(R.id.passwordInput);
 		username = usernameInput.getText().toString();
 		password = passwordInput.getText().toString();
-		BTsock = BTsocket;
-		try {
-			output = BTsocket.getOutputStream();
-			input = BTsocket.getInputStream();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			System.exit(0);
-		}
 		
+		Intent controlIntent = new Intent(connect_button.getContext(), ControlActivity.class);
+		controlIntent.putExtra("USERNAME", username);
+		controlIntent.putExtra("PASSWORD", password);
+		controlIntent.putExtra("REMOTE_BT", remoteBT);
 		
-	}
-	
-	public void toggle_button_click(View view) {
-		ToggleButton toggleButton = (ToggleButton) view;
-		Packet togglePacket = new Packet();
+		Log.i("ConnectActivity", "starting ControlActivity for device " + remoteBT.getAddress());
+		startActivity(controlIntent);
 		
-		if( toggleButton.isChecked() ) {
-			togglePacket.setPacketType(packetType.ENABLE);
-		} else {
-			togglePacket.setPacketType(packetType.DISABLE);
-		}
-		togglePacket.setCredentials(username, password);
-		try {
-			output.write(togglePacket.getPacketData());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 }

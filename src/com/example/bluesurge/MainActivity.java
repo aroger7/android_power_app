@@ -1,16 +1,16 @@
 package com.example.bluesurge;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.UUID;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -20,6 +20,9 @@ import android.widget.ScrollView;
 
 public class MainActivity extends Activity {
 
+	BluetoothComms connectedBTService = null;
+	IBinder mBinder = null;
+	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,24 +60,36 @@ public class MainActivity extends Activity {
         	    	BTButton btButton = (BTButton)button;
         	        BluetoothAdapter localBT = BluetoothAdapter.getDefaultAdapter();
         	        BluetoothDevice remoteBT = btButton.getRemoteBT();
-        	        if( !localBT.isEnabled() && remoteBT == null ) {
-        	        	Log.e("MainActivity", "Can't connect, BT is off or device doesn't exist");
-        	        } else {
-        	        	/*UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
-        	        	BluetoothSocket BTsocket = null;
-        	        	try {
-							BTsocket = remoteBT.createRfcommSocketToServiceRecord(uuid);
-							BTsocket.connect();
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							Log.e("MainActivity", "connect failed");
-							return;
-						}*/
         	        	
-        	        	Intent toggleIntent = new Intent(button.getContext(), ToggleActivity.class);
-        	        	toggleIntent.putExtra("REMOTE_BT", remoteBT);
-        	    		startActivity(toggleIntent);
-        	        }
+        	        	ServiceConnection serviceConnect = new ServiceConnection() {
+
+							@Override
+							public void onServiceConnected(ComponentName arg0,
+									IBinder arg1) {
+								// TODO Auto-generated method stub
+								Log.e("MainActivity", "Service connected");
+								connectedBTService = ((BluetoothComms.LocalBinder)arg1).getService();
+								mBinder = arg1;
+							}
+
+							@Override
+							public void onServiceDisconnected(ComponentName name) {
+								// TODO Auto-generated method stub
+								
+							}
+        	        		
+        	        	};
+        	        	Intent connectIntent = new Intent(button.getContext(), ConnectActivity.class);
+        	        	Intent serviceIntent = new Intent(button.getContext(), BluetoothComms.class);
+        	        	if( startService(serviceIntent) != null ) {
+        	        		Log.e("MainActivity", "Started BT service");
+        	        	}
+        	    		if( bindService(serviceIntent, serviceConnect, 0) == true) {
+        	    			Log.e("MainActivity", "Bound to BT service");
+        	    		}
+        	        	connectIntent.putExtra("REMOTE_BT", remoteBT);       	    		
+        	    		startActivity(connectIntent);
+        	        //}
         	    }
         	};
         	button.setOnClickListener(listen);
